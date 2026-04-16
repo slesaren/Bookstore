@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Поиск книг - Книжный магазин{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="bi bi-search"></i> Поиск книг
+        </h2>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Параметры поиска</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Название</label>
+                        <input type="text" class="form-control" id="title" name="title"
+                               placeholder="Введите название книги">
+                    </div>
+                    <div class="mb-3">
+                        <label for="author" class="form-label">Автор</label>
+                        <input type="text" class="form-control" id="author" name="author"
+                               placeholder="Введите имя автора">
+                    </div>
+                    <div class="mb-3">
+                        <label for="genre_id" class="form-label">Жанр</label>
+                        <select class="form-select" id="genre_id" name="genre_id">
+                            <option value="">Все жанры</option>
+                            {% for genre in genres %}
+                            <option value="{{ genre.id }}">{{ genre.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> Искать
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Результаты поиска ({{ books|length }} найдено)</h5>
+            </div>
+            <div class="card-body">
+                {% if books %}
+                    <div class="row">
+                        {% for book in books %}
+                        <div class="col-12 mb-3">
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-9">
+                                            <h5 class="card-title">{{ book.title }}</h5>
+                                            <h6 class="card-subtitle mb-2 text-muted">{{ book.author }}</h6>
+                                            <div class="rating mb-2">
+                                                {% for i in range(5) %}
+                                                    {% if i < book.rating|int %}
+                                                        <i class="bi bi-star-fill text-warning"></i>
+                                                    {% elif i < book.rating %}
+                                                        <i class="bi bi-star-half text-warning"></i>
+                                                    {% else %}
+                                                        <i class="bi bi-star text-warning"></i>
+                                                    {% endif %}
+                                                {% endfor %}
+                                                <small class="text-muted">({{ "%.1f"|format(book.rating) }})</small>
+                                            </div>
+                                            <p class="mb-1">
+                                                <strong>Жанр:</strong> {{ book.genre.name if book.genre else 'Не указан' }}
+                                            </p>
+                                            <p class="mb-1">
+                                                <strong>Возрастной рейтинг:</strong> {{ book.age_rating }}
+                                            </p>
+                                            <p class="mb-0">
+                                                <strong>В наличии:</strong>
+                                                {% if book.stock > 0 %}
+                                                    <span class="text-success">{{ book.stock }} шт.</span>
+                                                {% else %}
+                                                    <span class="text-danger">Нет в наличии</span>
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                        <div class="col-3 text-end">
+                                            <p class="price mb-2">{{ "%.2f"|format(book.price) }} ₽</p>
+                                            {% if book.stock > 0 %}
+                                                <a href="{{ url_for('order_book', book_id=book.id) }}"
+                                                   class="btn btn-primary btn-sm w-100">
+                                                    Купить
+                                                </a>
+                                            {% endif %}
+                                            <a href="{{ url_for('book_detail', book_id=book.id) }}"
+                                               class="btn btn-outline-secondary btn-sm w-100 mt-2">
+                                                Подробнее
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-book display-1 text-muted"></i>
+                        <h5 class="mt-3">Книги не найдены</h5>
+                        <p class="text-muted">Попробуйте изменить параметры поиска</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

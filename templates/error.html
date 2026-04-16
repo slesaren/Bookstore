@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Ошибка - Книжный магазин{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 text-center">
+        <div class="card">
+            <div class="card-body py-5">
+                <i class="bi bi-exclamation-triangle display-1 text-warning"></i>
+                <h1 class="display-1 mt-3">Ой!</h1>
+                <h3 class="mb-4">Что-то пошло не так</h3>
+                <p class="lead mb-4">{{ message or 'Произошла непредвиденная ошибка. Пожалуйста, попробуйте позже.' }}</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-house"></i> На главную
+                    </a>
+                    <button onclick="history.back()" class="btn btn-outline-secondary btn-lg">
+                        <i class="bi bi-arrow-left"></i> Вернуться назад
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4">
+            <div class="alert alert-secondary">
+                <i class="bi bi-info-circle"></i>
+                Если ошибка повторяется, пожалуйста, свяжитесь с поддержкой.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

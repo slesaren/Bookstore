@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}Оформление заказа - Книжный магазин{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Главная</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('book_detail', book_id=book.id) }}">{{ book.title }}</a></li>
+                <li class="breadcrumb-item active">Оформление заказа</li>
+            </ol>
+        </nav>
+
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">Оформление заказа</h4>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h5>Информация о книге</h5>
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-8">
+                                        <h6>{{ book.title }}</h6>
+                                        <p class="text-muted mb-0">{{ book.author }}</p>
+                                        <p class="mb-0 mt-2">
+                                            <strong>Цена:</strong> {{ "%.2f"|format(book.price) }} ₽
+                                        </p>
+                                        <p class="mb-0">
+                                            <strong>В наличии:</strong>
+                                            {% if book.stock > 0 %}
+                                                <span class="text-success">{{ book.stock }} шт.</span>
+                                            {% else %}
+                                                <span class="text-danger">Нет в наличии</span>
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                    <div class="col-4 text-end">
+                                        <div class="rating">
+                                            {% for i in range(5) %}
+                                                {% if i < book.rating|int %}
+                                                    <i class="bi bi-star-fill text-warning"></i>
+                                                {% elif i < book.rating %}
+                                                    <i class="bi bi-star-half text-warning"></i>
+                                                {% else %}
+                                                    <i class="bi bi-star text-warning"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Блок с акциями (статический, как в book_detail) -->
+                {% if promotions and promotions|length > 0 %}
+                <div class="card mb-4 border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">
+                            <i class="bi bi-tags"></i> Действующие акции
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% for promo in promotions %}
+                        <div class="border mb-3 p-3 rounded bg-light">
+                            <h6 class="mb-2">{{ promo.name }}</h6>
+                            <p class="mb-1">{{ promo.description or '' }}</p>
+
+                            {% if promo.discount_type == 'percent' %}
+                                <span class="badge bg-danger mb-2">Скидка {{ promo.discount_value }}%</span>
+                            {% elif promo.discount_type == 'buy_x_get_y_free' %}
+                                <span class="badge bg-success mb-2">
+                                    Купи {{ promo.buy_quantity }}, получи {{ promo.free_quantity }} бесплатно
+                                </span>
+                            {% endif %}
+
+                            <small class="text-muted d-block mt-1">
+                                Действует до: {{ promo.valid_until.strftime('%d.%m.%Y %H:%M') if promo.valid_until else 'Бессрочно' }}
+                            </small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <form method="POST" id="orderForm">
+                    <div class="mb-4">
+                        <label for="quantity" class="form-label fw-bold">Количество экземпляров</label>
+                        <input type="number" class="form-control form-control-lg" id="quantity"
+                               name="quantity" min="1" max="{{ book.stock }}" value="1" required>
+                        <div class="form-text">
+                            Доступно для заказа: {{ book.stock }} шт.
+                        </div>
+                    </div>
+
+                   <!-- Вместо <div class="alert alert-info"> используем обычный div -->
+<div class="bg-info bg-opacity-10 p-3 rounded mb-3">
+    <i class="bi bi-info-circle"></i>
+    <strong>Итого к оплате:</strong>
+    <span id="total" class="fw-bold fs-5">{{ "%.2f"|format(default_total) }} ₽</span>
+    <div id="appliedPromo" class="small mt-1">
+        {% if applied_promotion %}
+            <span class="text-success">✓ Применена акция: {{ applied_promotion }}</span>
+        {% else %}
+            <span class="text-muted">Акции не применяются</span>
+        {% endif %}
+    </div>
+</div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('book_detail', book_id=book.id) }}" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Назад к книге
+                        </a>
+                        <button type="submit" class="btn btn-success btn-lg"
+                                {% if book.stock == 0 %}disabled{% endif %}>
+                            <i class="bi bi-cart-check"></i> Оформить заказ
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const price = {{ book.price }};
+    const quantityInput = document.getElementById('quantity');
+    const totalSpan = document.getElementById('total');
+    const appliedPromoDiv = document.getElementById('appliedPromo');
+    const bookId = {{ book.id }};
+
+    // Функция форматирования цены
+    function formatPrice(price) {
+        return price.toFixed(2) + ' ₽';
+    }
+
+    // Функция обновления итоговой суммы через AJAX (только по событию input)
+    async function updateTotal() {
+        const quantity = parseInt(quantityInput.value) || 0;
+        if (quantity <= 0) {
+            totalSpan.textContent = formatPrice(0);
+            appliedPromoDiv.innerHTML = '<span class="text-muted">Акции не применяются</span>';
+            return;
+        }
+
+        try {
+            const response = await fetch(`/calculate_total/${bookId}?quantity=${quantity}`);
+            const data = await response.json();
+
+            if (response.ok) {
+                totalSpan.textContent = formatPrice(data.total);
+                if (data.applied_promotion) {
+                    appliedPromoDiv.innerHTML = `<span class="text-success">✓ Применена акция: ${data.applied_promotion}</span>`;
+                } else {
+                    appliedPromoDiv.innerHTML = '<span class="text-muted">Акции не применяются</span>';
+                }
+            } else {
+                // Если ошибка, показываем стандартную сумму
+                totalSpan.textContent = formatPrice(price * quantity);
+                appliedPromoDiv.innerHTML = '<span class="text-muted">Акции не применяются</span>';
+            }
+        } catch (error) {
+            console.error('Error calculating total:', error);
+            totalSpan.textContent = formatPrice(price * quantity);
+            appliedPromoDiv.innerHTML = '<span class="text-muted">Акции не применяются</span>';
+        }
+    }
+
+    // Обновляем только при изменении количества (без таймеров)
+    quantityInput.addEventListener('input', updateTotal);
+
+    // Обновляем один раз при загрузке страницы (для синхронизации)
+    updateTotal();
+</script>
+{% endblock %}

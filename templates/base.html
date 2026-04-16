@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Книжный магазин{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 2rem 0;
+            margin-top: 3rem;
+            border-top: 1px solid #dee2e6;
+        }
+        .book-card {
+            transition: transform 0.2s;
+            margin-bottom: 1rem;
+        }
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .rating {
+            color: #ffc107;
+        }
+        .price {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #28a745;
+        }
+        .stock-badge {
+            font-size: 0.8rem;
+        }
+        .flash-messages {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 1000;
+            max-width: 400px;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="bi bi-book"></i> Книжный магазин
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('index') }}">
+                            <i class="bi bi-house"></i> Главная
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('search') }}">
+                            <i class="bi bi-search"></i> Поиск
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('popular') }}">
+                            <i class="bi bi-star-fill"></i> Популярное
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('genres') }}">
+                            <i class="bi bi-tags"></i> Жанры
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash сообщения -->
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Основной контент -->
+    <main class="container mt-5 pt-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5><i class="bi bi-book"></i> Книжный магазин</h5>
+                    <p>Лучшие книги по лучшим ценам</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Контакты</h5>
+                    <p><i class="bi bi-geo-alt"></i> г. Новосибирск, ул. Книжная, 1</p>
+                    <p><i class="bi bi-telephone"></i> +7 (495) 123-45-67</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Режим работы</h5>
+                    <p>Пн-Пт: 10:00 - 20:00</p>
+                    <p>Сб-Вс: 11:00 - 18:00</p>
+                </div>
+            </div>
+            <hr>
+            <div class="text-center">
+                <p>&copy; 2026 Книжный магазин. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Автоматическое скрытие flash сообщений через 5 секунд
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

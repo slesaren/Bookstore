@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Популярные книги - Книжный магазин{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="bi bi-star-fill text-warning"></i> Самые популярные книги
+        </h2>
+        <p class="lead">Книги, которые выбирают наши читатели чаще всего</p>
+        <p class="text-muted">Рейтинг основан на количестве просмотров, отзывах и оценках</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                {% if books %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                 <tr>
+                                    <th>#</th>
+                                    <th>Название</th>
+                                    <th>Автор</th>
+                                    <th>Рейтинг</th>
+                                    <th>Просмотры</th>
+                                    <th>Кол-во отзывов</th>
+                                    <th>Цена</th>
+                                    <th>В наличии</th>
+                                    <th>Действия</th>
+                                 </tr>
+                            </thead>
+                            <tbody>
+                                {% for book in books %}
+                                 <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>
+                                        <strong>{{ book.title }}</strong>
+                                        {% if loop.index <= 3 %}
+                                            <i class="bi bi-trophy-fill text-warning"></i>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ book.author }}</td>
+                                    <td>
+                                        <div class="rating">
+                                            {% for i in range(5) %}
+                                                {% if i < book.rating|int %}
+                                                    <i class="bi bi-star-fill text-warning"></i>
+                                                {% elif i < book.rating %}
+                                                    <i class="bi bi-star-half text-warning"></i>
+                                                {% else %}
+                                                    <i class="bi bi-star text-warning"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                            <small class="text-muted">({{ "%.1f"|format(book.rating) }})</small>
+                                        </div>
+                                    </td>
+                                     <td><span class="badge bg-info">{{ book.views if book.views else 0 }}</span></td>
+
+                                    <td>
+                                        <span class="badge bg-secondary">{{ book.review_count|default(0) }} </span>
+                                    </td>
+                                    <td class="price">{{ "%.2f"|format(book.price) }} ₽</td>
+                                    <td>
+                                        {% if book.stock > 0 %}
+                                            <span class="badge bg-success">{{ book.stock }} шт.</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Нет</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('book_detail', book_id=book.id) }}"
+                                           class="btn btn-sm btn-outline-primary">
+                                            Подробнее
+                                        </a>
+                                        {% if book.stock > 0 %}
+                                            <a href="{{ url_for('order_book', book_id=book.id) }}"
+                                               class="btn btn-sm btn-primary">
+                                                Купить
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                  </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi bi-emoji-frown display-1 text-muted"></i>
+                        <h5 class="mt-3">Нет данных о популярных книгах</h5>
+                        <p class="text-muted">Пока еще нет книг с достаточным количеством отзывов (минимум 3)</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

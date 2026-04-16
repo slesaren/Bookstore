@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}{{ genre.name }} - Книжный магазин{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Главная</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('genres') }}">Жанры</a></li>
+                <li class="breadcrumb-item active">{{ genre.name }}</li>
+            </ol>
+        </nav>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="mb-3">{{ genre.name }}</h2>
+                <p class="lead">{{ genre.description or 'Описание жанра отсутствует' }}</p>
+                <div class="d-flex gap-3">
+                    <span class="badge bg-primary">
+                        <i class="bi bi-star-fill"></i> Популярность: {{ "%.1f"|format(genre.popularity or 0) }}/10
+                    </span>
+                    <span class="badge bg-secondary">
+                        <i class="bi bi-book"></i> Книг в жанре: {{ books|length }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <h4 class="mb-3">Книги в жанре "{{ genre.name }}"</h4>
+
+        {% if books %}
+            <div class="row">
+                {% for book in books %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card book-card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ book.title }}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">{{ book.author }}</h6>
+                            <div class="rating mb-2">
+                                {% for i in range(5) %}
+                                    {% if i < book.rating|int %}
+                                        <i class="bi bi-star-fill text-warning"></i>
+                                    {% elif i < book.rating %}
+                                        <i class="bi bi-star-half text-warning"></i>
+                                    {% else %}
+                                        <i class="bi bi-star text-warning"></i>
+                                    {% endif %}
+                                {% endfor %}
+                                <small class="text-muted">({{ "%.1f"|format(book.rating) }})</small>
+                            </div>
+                            <p class="mb-2">
+                                <small class="text-muted">
+                                    <i class="bi bi-person"></i> Возрастной рейтинг: {{ book.age_rating }}
+                                </small>
+                            </p>
+                            <p class="price mb-3">{{ "%.2f"|format(book.price) }} ₽</p>
+                            <div class="d-flex gap-2">
+                                <a href="{{ url_for('book_detail', book_id=book.id) }}"
+                                   class="btn btn-outline-primary btn-sm flex-grow-1">
+                                    Подробнее
+                                </a>
+                                {% if book.stock > 0 %}
+                                    <a href="{{ url_for('order_book', book_id=book.id) }}"
+                                       class="btn btn-primary btn-sm">
+                                        Купить
+                                    </a>
+                                {% endif %}
+                            </div>
+                            <div class="mt-2">
+                                {% if book.stock > 0 %}
+                                    <span class="badge bg-success">В наличии: {{ book.stock }} шт.</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Нет в наличии</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> В этом жанре пока нет книг.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

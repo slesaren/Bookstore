@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Главная - Книжный магазин{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="p-5 mb-4 bg-light rounded-3">
+            <div class="container-fluid py-5 text-center">
+                <h1 class="display-5 fw-bold">Добро пожаловать в книжный магазин!</h1>
+                <p class="col-md-8 fs-4 mx-auto">
+                    Откройте для себя мир литературы. У нас вы найдете книги на любой вкус.
+                </p>
+                <a href="{{ url_for('search') }}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-search"></i> Начать поиск
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="bi bi-star-fill text-warning"></i> Популярные книги
+        </h2>
+    </div>
+
+    {% if popular_books %}
+        {% for book in popular_books %}
+        <div class="col-md-4 col-lg-3">
+            <div class="card book-card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">{{ book.title }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ book.author }}</h6>
+                    <div class="rating mb-2">
+                        {% for i in range(5) %}
+                            {% if i < book.rating|int %}
+                                <i class="bi bi-star-fill"></i>
+                            {% elif i < book.rating %}
+                                <i class="bi bi-star-half"></i>
+                            {% else %}
+                                <i class="bi bi-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                        <small class="text-muted">({{ "%.1f"|format(book.rating) }})</small>
+                    </div>
+                    <p class="price">{{ "%.2f"|format(book.price) }} ₽</p>
+                    <a href="{{ url_for('book_detail', book_id=book.id) }}" class="btn btn-outline-primary btn-sm">
+                        Подробнее
+                    </a>
+                    <a href="{{ url_for('order_book', book_id=book.id) }}" class="btn btn-primary btn-sm">
+                        Купить
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> Нет доступных книг для отображения.
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-4">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <i class="bi bi-truck display-1 text-primary"></i>
+                <h5 class="card-title mt-3">Быстрая доставка</h5>
+                <p class="card-text">Доставка по всей России от 2 дней</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <i class="bi bi-gift display-1 text-primary"></i>
+                <h5 class="card-title mt-3">Акции и скидки</h5>
+                <p class="card-text">Постоянные акции для постоянных покупателей</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <i class="bi bi-headset display-1 text-primary"></i>
+                <h5 class="card-title mt-3">Поддержка 24/7</h5>
+                <p class="card-text">Всегда готовы помочь с выбором книги</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
