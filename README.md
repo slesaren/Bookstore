@@ -40,7 +40,7 @@
 ##  Установка и запуск
 1. Клонирование репозитория
 ```bash
-git clone <repository-url>
+git clone https://github.com/slesaren/Bookstore
 cd bookstore-project
 ```
 2. Установка зависимостей
